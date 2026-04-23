@@ -23,6 +23,47 @@ The application allows staff members to create events with specific capacities a
 
 ## ✅ Requirements Met
 - **Domain Modeling:** UML-based class structure.
+```mermaid
+classDiagram
+    class Participant {
+        <<abstract>>
+        -int id
+        -String name
+        -String email
+    }
+    class Individual {
+    }
+    class Organization {
+        -String representativeName
+    }
+    class Event {
+        -int id
+        -String title
+        -String description
+        -LocalDateTime startDateTime
+        -LocalDateTime endDateTime
+        -String location
+        -int capacity
+        +isfull() boolean
+    }
+    class Invitation {
+        -int eventId
+        -int participantId
+        -Status status
+    }
+    class Status {
+        <<enumeration>>
+        PENDING
+        ACCEPTED
+        DECLINED
+    }
+    Participant <|-- Individual
+    Participant <|-- Organization
+    Event "1" -- "0..*" Invitation
+    Participant "1" -- "0..*" Invitation
+    Invitation --> Status
+```
+
 - **OOP Principles:** Abstraction, Encapsulation, Inheritance, and Polymorphism.
 - **Clean Code:** Meaningful naming, exception handling, and modular logic.
 
