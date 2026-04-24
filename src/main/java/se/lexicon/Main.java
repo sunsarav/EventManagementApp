@@ -17,12 +17,22 @@ public class Main {
             // Initialize DAO
             ParticipantDAO participantDAO = new ParticipantDAOImpl(connection);
 
-            Participant test = new Participant("Shanmu","sarav07@gmail.com",
+            Participant test = new Participant("Shanmu","krish@gmail.com",
                     "Individual",null);
-            participantDAO.save(test);
 
-            System.out.println("Participant has been saved successfully:" + test.toString());
-            System.out.println("Current list size: " + participantDAO.findAll().size());
+            // 1. Test SAVE
+            participantDAO.save(test);
+            System.out.println("1. SAVE TEST: Saved successfully:" + test.getName() +
+                    " with ID: " + test.getId());
+
+            // 2. Test FIND BY ID
+            Participant found = participantDAO.findById(test.getId());
+            System.out.println("2. FIND BY ID TEST: Found Name is -> " +
+                    (found != null ? found.getName() : "Not Found"));
+
+            // 3. TEST FIND ALL
+            System.out.println("3. FIND ALL TEST: Total rows in DB : " +
+                    participantDAO.findAll().size());
 
         } catch (SQLException e) {
             System.err.println("Database error!");

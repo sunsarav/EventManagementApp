@@ -32,9 +32,9 @@ public class ParticipantDAOImpl implements ParticipantDAO {
             ps.executeUpdate();
 
             // Read auto-generated ID
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
-                    participant.setId(keys.getInt(1));
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    participant.setId(rs.getInt(1));
                 }
             }
     } catch (SQLException e) {
@@ -46,7 +46,27 @@ public class ParticipantDAOImpl implements ParticipantDAO {
 
     @Override
     public Participant findById(Integer id) {
-        return null;
+        String sql = "SELECT * FROM participants WHERE id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1,id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Participant(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("participant_type"),
+                            rs.getString("representative_name")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error finding participant by ID: " + e.getMessage());
+            throw new RuntimeException("Error finding participant", e);
+        }
+        return null; // If no participant was found with that ID
     }
 
     @Override
