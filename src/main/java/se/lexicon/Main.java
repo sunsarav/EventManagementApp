@@ -1,19 +1,31 @@
 package se.lexicon;
 
+import se.lexicon.dao.ParticipantDAO;
+import se.lexicon.dao.ParticipantDAOImpl;
+import se.lexicon.db.MySqlConnection;
+import se.lexicon.model.Participant;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
 public class Main {
     static void main() {
         try {
-            // Get the DataSource
-            javax.sql.DataSource ds = se.lexicon.db.MySqlConnection.getMysqlDataSource();
+            // Connection Logic
+            Connection connection = MySqlConnection.getMysqlDataSource().getConnection();
 
-            // Ask DataSource for a connection
-            java.sql.Connection connection = ds.getConnection();
+            // Initialize DAO
+            ParticipantDAO participantDAO = new ParticipantDAOImpl(connection);
 
-            if (connection != null) {
-                System.out.println("Success: Connected using DataSource.");
-            }
-        } catch (java.sql.SQLException e) {
-            System.out.println("Connection Failed!");
+            Participant test = new Participant("Shanmu","sarav07@gmail.com",
+                    "Individual",null);
+            participantDAO.save(test);
+
+            System.out.println("Participant has been saved successfully:" + test.toString());
+            System.out.println("Current list size: " + participantDAO.findAll().size());
+
+        } catch (SQLException e) {
+            System.err.println("Database error!");
             e.printStackTrace();
         }
     }

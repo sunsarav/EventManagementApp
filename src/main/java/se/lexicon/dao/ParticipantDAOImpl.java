@@ -1,0 +1,78 @@
+package se.lexicon.dao;
+
+import se.lexicon.model.Participant;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ParticipantDAOImpl implements ParticipantDAO {
+
+    private final Connection connection;
+
+    public ParticipantDAOImpl(Connection connection) {
+        this.connection = connection;
+    }
+
+    @Override
+    public Participant save(Participant participant) {
+        String sql = "INSERT INTO participants (name, email, participant_type, representative_name) " +
+                "VALUES (?,?,?,?)";
+
+        try (
+            // Statement.RETURN_GENERATED_KEYS is used to retrieve auto-generated ID values from INSERT statements
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        ) {
+            ps.setString(1, participant.getParticipantType());
+            ps.setString(2, participant.getEmail());
+            ps.setString(3, participant.getParticipantType());
+            ps.setString(4, participant.getRepresentativeName());
+
+            ps.executeUpdate();
+
+            // Read auto-generated ID
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    participant.setId(keys.getInt(1));
+                }
+            }
+    } catch (SQLException e) {
+            System.err.println("❌ Error saving participant: " + e.getMessage());
+            throw new RuntimeException("Error saving participant", e);
+        }
+        return participant;
+    }
+
+    @Override
+    public Participant findById(Integer id) {
+        return null;
+    }
+
+    @Override
+    public List<Participant> findAll() {
+
+        List<Participant> participants = new ArrayList<>();
+        String sql = "SELECT * FROM participants";
+
+        try (
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()
+        ) {
+            while (rs.next()) {
+                participants.add(new Participant(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("participant_type"),
+                        rs.getString("representative_name")
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("❌ Error fetching participants: " + e.getMessage());
+            throw new RuntimeException("Error fetching participants", e);
+        }
+        return participants;
+    }
+}
