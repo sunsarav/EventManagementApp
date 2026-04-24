@@ -1,17 +1,21 @@
 package se.lexicon;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     static void main() {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        IO.println(String.format("Hello and welcome!"));
+        try {
+            // Get the DataSource
+            javax.sql.DataSource ds = se.lexicon.db.MySqlConnection.getMysqlDataSource();
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            IO.println("i = " + i);
+            // Ask DataSource for a connection
+            java.sql.Connection connection = ds.getConnection();
+
+            if (connection != null) {
+                System.out.println("Success: Connected using DataSource.");
+            }
+        } catch (java.sql.SQLException e) {
+            System.out.println("Connection Failed!");
+            e.printStackTrace();
         }
     }
-}
+    }
+
