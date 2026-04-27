@@ -1,30 +1,49 @@
 package se.lexicon.model;
 
+import se.lexicon.dao.EventDAO;
+
 public class Invitation {
-    private int eventId;
-    private int participantId;
+    private int id;                  // Id for database tracking
+    private Event event;             // Composition: Invitation "has an" Event
+    private Participant participant; // Composition: Invitation "has a" Participant
     private Status status;
 
-    public Invitation(int eventId, int participantId, Status status) {
-        this.eventId = eventId;
-        this.participantId = participantId;
+    // Constructor for creating NEW invitations
+    public Invitation(Event event, Participant participant, Status status) {
+        this.event = event;
+        this.participant = participant;
+        this.status = status;
+    }
+    // Constructor for Loading from Database (includes ID)
+    public Invitation(int id, Event event, Participant participant, Status status) {
+        this.id = id;
+        this.event = event;
+        this.participant = participant;
         this.status = status;
     }
 
-    public int getEventId() {
-        return eventId;
+    public int getId() {
+        return id;
     }
 
-    public void setEventId(int eventId) {
-        this.eventId = eventId;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public int getParticipantId() {
-        return participantId;
+    public Event getEvent() {
+        return event;
     }
 
-    public void setParticipantId(int participantId) {
-        this.participantId = participantId;
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
+    public Participant getParticipant() {
+        return participant;
+    }
+
+    public void setParticipant(Participant participant) {
+        this.participant = participant;
     }
 
     public Status getStatus() {
@@ -38,9 +57,11 @@ public class Invitation {
     @Override
     public String toString() {
         return "Invitation{" +
-                "eventId=" + eventId +
-                ", participantId=" + participantId +
+                "id=" + id +
+                ", event=" + event +
+                ", participant=" + participant +
                 ", status=" + status +
                 '}';
     }
 }
+

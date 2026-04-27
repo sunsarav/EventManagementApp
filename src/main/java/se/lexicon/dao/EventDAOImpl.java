@@ -43,6 +43,25 @@ public class EventDAOImpl implements EventDAO {
     }
 
     @Override
+    public Event findById(Integer id) {
+        String sql = "SELECT * FROM events WHERE id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToEvent(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error finding event by ID: " + e.getMessage());
+            throw new RuntimeException("Error finding event", e);
+        }
+        return null;
+    }
+
+    @Override
     public List<Event> findAll() {
         List<Event> events = new ArrayList<>();
         String sql = "SELECT * FROM events";

@@ -1,9 +1,6 @@
 package se.lexicon;
 
-import se.lexicon.dao.EventDAO;
-import se.lexicon.dao.EventDAOImpl;
-import se.lexicon.dao.ParticipantDAO;
-import se.lexicon.dao.ParticipantDAOImpl;
+import se.lexicon.dao.*;
 import se.lexicon.db.MySqlConnection;
 import se.lexicon.model.Participant;
 import se.lexicon.ui.CommunityCenterApp;
@@ -20,13 +17,14 @@ public class Main {
             // Initialize DAO
             ParticipantDAO participantDAO = new ParticipantDAOImpl(connection);
             EventDAO eventDAO = new EventDAOImpl(connection);
+            InvitationDAO invitationDAO = new InvitationDAOImpl(connection, participantDAO, eventDAO);
 
             // Start the UI
             CommunityCenterApp app = new CommunityCenterApp(participantDAO, eventDAO);
             app.start();
 
         } catch (SQLException e) {
-            System.err.println("❌ Database connnection failed!");
+            System.err.println("❌ Database connection failed!");
             e.printStackTrace();
         }
     }
