@@ -14,8 +14,8 @@ public class EventDAOImpl implements EventDAO {
 
     @Override
     public Event save(Event event) {
-        String sql = "INSERT INTO events (title, description, participant, representative) " +
-                "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO events (title, description, start_time, end_time," +
+                "location, capacity) " + "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)

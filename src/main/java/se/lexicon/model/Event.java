@@ -11,8 +11,21 @@ public class Event {
     private String location;
     private int capacity;
 
-    public Event(int id, String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, int capacity) {
+    // 7-argument Constructor for database loading
+    public Event(int id, String title, String description, LocalDateTime startDateTime,
+                 LocalDateTime endDateTime, String location, int capacity) {
         this.id = id;
+        this.title = title;
+        this.description = description;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.location = location;
+        this.capacity = capacity;
+    }
+
+    // 6-argument Constructor for New events
+    public Event(String title, String description, LocalDateTime startDateTime,
+                 LocalDateTime endDateTime, String location, int capacity) {
         this.title = title;
         this.description = description;
         this.startDateTime = startDateTime;
