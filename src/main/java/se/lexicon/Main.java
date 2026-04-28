@@ -20,7 +20,7 @@ public class Main {
             InvitationDAO invitationDAO = new InvitationDAOImpl(connection, participantDAO, eventDAO);
 
             // Start the UI
-            CommunityCenterApp app = new CommunityCenterApp(participantDAO, eventDAO);
+            CommunityCenterApp app = new CommunityCenterApp(connection, participantDAO, eventDAO);
             app.start();
 
         } catch (SQLException e) {

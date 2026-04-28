@@ -1,19 +1,24 @@
 package se.lexicon.ui;
 
 import se.lexicon.dao.EventDAO;
+import se.lexicon.dao.InvitationDAO;
+import se.lexicon.dao.InvitationDAOImpl;
 import se.lexicon.dao.ParticipantDAO;
 import se.lexicon.model.Event;
 import se.lexicon.model.Invitation;
 import se.lexicon.model.Participant;
 import se.lexicon.model.Status;
 
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
 public class CommunityCenterApp {
+    private final InvitationDAO invitationDAO;
     private final ParticipantDAO participantDAO;
     private final EventDAO eventDAO;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -21,10 +26,11 @@ public class CommunityCenterApp {
     private List<Invitation> invitations = new ArrayList<Invitation>();
     private final int MAX_PARTICIPANTS = 10;
 
-    public CommunityCenterApp(ParticipantDAO participantDAO, EventDAO eventDAO)
+    public CommunityCenterApp(Connection connection, ParticipantDAO participantDAO, EventDAO eventDAO)
     {
         this.participantDAO = participantDAO;
         this.eventDAO = eventDAO;
+        this.invitationDAO = new InvitationDAOImpl(connection, participantDAO, eventDAO);
     }
     public void start() {
         while (true) {
@@ -49,7 +55,8 @@ public class CommunityCenterApp {
             }
         }
     }
-    // methods
+    // Register Participants (Individuals / Organizations)
+
     private void registerParticipant() {
         System.out.println("\n-------Register new Participant-------");
 
@@ -75,6 +82,8 @@ public class CommunityCenterApp {
             System.err.println("❌ Failed to register participant: " + e.getMessage());
         }
     }
+    // Create and manage Events
+
     private void createEvent() {
         System.out.println("Enter Title: ");
         String title = scanner.nextLine();
@@ -98,6 +107,8 @@ public class CommunityCenterApp {
         eventDAO.save(newEvent);
         System.out.println("✅ Event created with ID: " +  newEvent.getId());
     }
+    // View all upcoming events
+
     private void viewAllEvents() {
         System.out.println("\n------- \uD83D\uDCC5 Upcoming Events -------");
         List<Event> events = eventDAO.findAll();
@@ -119,7 +130,8 @@ public class CommunityCenterApp {
                         event.getCapacity())
                 );
     }
-    // Methods
+    // Invite Participants to an event
+
     public void inviteParticipant() {
         // 1. Get the Participant
         System.out.println("Enter Participant Name: ");
@@ -140,7 +152,7 @@ public class CommunityCenterApp {
             System.out.println("❌ Error: Event not found.");
             return;
         }
-        // 3. Overbooking check (Java Streams) - Counts how many ACCEPTED invitations exist for this specific event
+        // 3. Prevent Overbooking  (Java Streams) - Counts how many ACCEPTED invitations exist for this specific event
         long acceptedCount = invitations.stream()
                 .filter(invitation -> invitation.getEvent().getId() == event.getId())
                 .filter(invitation -> invitation.getStatus() == Status.ACCEPTED)
@@ -156,6 +168,8 @@ public class CommunityCenterApp {
         System.out.println("✅ Success: " + name + " added to " + eventName
                 + " with Status " + initialStatus);
     }
+    // Update Invitation Status (accept/decline)
+
     public void updateInvitation() {
         if (invitations.isEmpty()) {
             System.out.println("No invitations to update");
@@ -185,5 +199,44 @@ public class CommunityCenterApp {
         } catch (Exception e) {
             System.out.println("❌ Invalid input.");
         }
+    }
+    // Attendance List (Accepted Participants)
+
+    public void viewAttendanceList(String eventName) {
+        // 1. Find the event first
+        Event event = eventDAO.findByName(eventName);
+
+        // 2. Check if event exists
+        if (event == null) {
+            System.out.println("❌ Event " + eventName + " not found.");
+            return;
+        }
+        System.out.println("------- Attendance List for: " + event.getTitle() + " -------");
+
+        // 3. Calling the method on the INSTANCE (invitationDAO)
+        List<Invitation> list = invitationDAO.findByEventId(event.getId());
+
+        // 4. Stream to filter only ACCEPTED
+        list.stream()
+                .filter(invitation -> invitation.getStatus() == Status.ACCEPTED)
+                .forEach(invitation -> System.out.println(invitation.getParticipant().getName()));
+        }
+    // View Sorted Events
+
+    public void viewSortedEvents() {
+        System.out.println("\n------- Upcoming Events (Sorted By Date) -------");
+
+        // 1. Fetch from Database
+        List<Event> events = eventDAO.findAll();
+
+        if (events.isEmpty()) {
+            System.out.println("No events found.");
+            return;
+        }
+        // 2. Sort & Display using Streams
+        events.stream()
+                .sorted(Comparator.comparing(Event::getStartDateTime))
+                .forEach(event -> System.out.println(event.getStartDateTime() + " | "
+                        + event.getTitle()));
     }
 }
