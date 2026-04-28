@@ -95,4 +95,31 @@ public class ParticipantDAOImpl implements ParticipantDAO {
         }
         return participants;
     }
+
+    @Override
+    public Participant findByName(String name) {
+        String sql = "SELECT * FROM participants WHERE name = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, name);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Return a new participant object if found
+                    return new Participant(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("participant_type"),
+                            rs.getString("representative_name")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Error finding participant by name: " + e.getMessage());
+            throw new RuntimeException("Error finding participant by name", e);
+        }
+        // Returns null if no participant was found with that name
+        return null;
+    }
 }

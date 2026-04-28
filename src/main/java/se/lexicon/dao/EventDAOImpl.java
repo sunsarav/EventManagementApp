@@ -79,6 +79,26 @@ public class EventDAOImpl implements EventDAO {
         }
         return events;
     }
+
+    @Override
+    public Event findByName(String name) {
+        String sql = "SELECT * FROM events WHERE title = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, name);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToEvent(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error finding event by name: " + e.getMessage());
+            throw new RuntimeException("Error finding event by name", e);
+        }
+        return null;
+    }
+
     // Helper method to keep code clean
     private Event mapRowToEvent(ResultSet rs) throws SQLException {
         return new Event(

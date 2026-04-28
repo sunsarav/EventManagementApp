@@ -8,4 +8,5 @@ public interface ParticipantDAO {
     Participant save(Participant participant);
     Participant findById(Integer id);
     List<Participant> findAll();
+    Participant findByName(String name);
 }

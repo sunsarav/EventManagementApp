@@ -3,24 +3,28 @@ package se.lexicon.ui;
 import se.lexicon.dao.EventDAO;
 import se.lexicon.dao.ParticipantDAO;
 import se.lexicon.model.Event;
+import se.lexicon.model.Invitation;
 import se.lexicon.model.Participant;
+import se.lexicon.model.Status;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class CommunityCenterApp {
     private final ParticipantDAO participantDAO;
     private final EventDAO eventDAO;
-    private final Scanner scanner;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private Scanner scanner = new Scanner(System.in);
+    private List<Invitation> invitations = new ArrayList<Invitation>();
+    private final int MAX_PARTICIPANTS = 10;
 
     public CommunityCenterApp(ParticipantDAO participantDAO, EventDAO eventDAO)
     {
         this.participantDAO = participantDAO;
         this.eventDAO = eventDAO;
-        this.scanner = new Scanner(System.in);
     }
     public void start() {
         while (true) {
@@ -114,5 +118,72 @@ public class CommunityCenterApp {
                         event.getLocation(),
                         event.getCapacity())
                 );
+    }
+    // Methods
+    public void inviteParticipant() {
+        // 1. Get the Participant
+        System.out.println("Enter Participant Name: ");
+        String name = scanner.nextLine();
+
+        // Logic to get the Participant object from DAO
+        Participant participant = participantDAO.findByName(name);
+        if (participant == null) {
+            System.out.println("❌ Error: Participant not found.");
+            return;
+        }
+        // 2. Get the Event
+        System.out.println("Enter Event Name: ");
+        String eventName = scanner.nextLine();
+
+        Event event = eventDAO.findByName(eventName);
+        if (event == null) {
+            System.out.println("❌ Error: Event not found.");
+            return;
+        }
+        // 3. Overbooking check (Java Streams) - Counts how many ACCEPTED invitations exist for this specific event
+        long acceptedCount = invitations.stream()
+                .filter(invitation -> invitation.getEvent().getId() == event.getId())
+                .filter(invitation -> invitation.getStatus() == Status.ACCEPTED)
+                .count();
+
+        // 4. Set Status based on Capacity
+        Status initialStatus = (acceptedCount >= MAX_PARTICIPANTS) ? Status.PENDING : Status.ACCEPTED;
+
+        //5. Create and add to List
+        Invitation newInvitation = new Invitation(event, participant, initialStatus);
+        invitations.add(newInvitation);
+
+        System.out.println("✅ Success: " + name + " added to " + eventName
+                + " with Status " + initialStatus);
+    }
+    public void updateInvitation() {
+        if (invitations.isEmpty()) {
+            System.out.println("No invitations to update");
+            return;
+        }
+        // Display current list for user to choose from an index
+        System.out.println("\n------- Current Events -------");
+        for (int i = 0; i < invitations.size(); i++) {
+            Invitation invitation = invitations.get(i);
+            System.out.println(invitation + " . [ " + invitation.getStatus() + " ]" +
+                    invitation.getParticipant().getName() + " @ " + invitation.getEvent().getTitle());
+        }
+        System.out.println("\nSelect Index to Update: ");
+        try {
+            int index = Integer.parseInt(scanner.nextLine());
+
+            if (index >= 0 && index < invitations.size()) {
+                System.out.println("Enter new status (ACCEPTED, PENDING, DECLINED): ");
+                String statusInput = scanner.nextLine().toUpperCase();
+
+                Status newStatus = Status.valueOf(statusInput);
+                invitations.get(index).setStatus(newStatus);
+                System.out.println("✅ Status updated to " + newStatus);
+            } else {
+                System.out.println("❌ Invalid index.");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Invalid input.");
+        }
     }
 }

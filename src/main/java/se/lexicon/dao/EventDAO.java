@@ -8,4 +8,5 @@ public interface EventDAO {
     Event save(Event event);
     Event findById(Integer id);
     List<Event> findAll();
+    Event findByName(String name);
 }
