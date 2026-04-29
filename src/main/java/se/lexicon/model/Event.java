@@ -1,6 +1,8 @@
 package se.lexicon.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Event {
     private int id;
@@ -10,6 +12,7 @@ public class Event {
     private LocalDateTime endDateTime;
     private String location;
     private int capacity;
+    private List<Invitation> invitations =  new ArrayList<>();
 
     // 7-argument Constructor for database loading
     public Event(int id, String title, String description, LocalDateTime startDateTime,
@@ -103,7 +106,7 @@ public class Event {
                 '}';
     }
 
-    public void isFull() {
-
+    public List<Invitation> getInvitations() {
+        return this.invitations;
     }
 }

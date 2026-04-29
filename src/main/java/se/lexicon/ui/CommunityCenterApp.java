@@ -21,16 +21,17 @@ public class CommunityCenterApp {
     private final InvitationDAO invitationDAO;
     private final ParticipantDAO participantDAO;
     private final EventDAO eventDAO;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private Scanner scanner = new Scanner(System.in);
-    private List<Invitation> invitations = new ArrayList<Invitation>();
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private final Scanner scanner = new Scanner(System.in);
+    private final List<Invitation> invitations = new ArrayList<>();
     private final int MAX_PARTICIPANTS = 10;
 
-    public CommunityCenterApp(Connection connection, ParticipantDAO participantDAO, EventDAO eventDAO)
+    public CommunityCenterApp(Connection connection, ParticipantDAO participantDAO, EventDAO eventDAO,
+                              InvitationDAO invitationDAO)
     {
         this.participantDAO = participantDAO;
         this.eventDAO = eventDAO;
-        this.invitationDAO = new InvitationDAOImpl(connection, participantDAO, eventDAO);
+        this.invitationDAO = invitationDAO;
     }
     public void start() {
         while (true) {
@@ -38,20 +39,37 @@ public class CommunityCenterApp {
             System.out.println("1. Register Participant");
             System.out.println("2. Create Event");
             System.out.println("3. View All Events");
+            System.out.println("4. Invite Participant to Event");
+            System.out.println("5. Update Invitation Status");
+            System.out.println("6. View Sorted Events");
+            System.out.println("7. View Attendance List");
             System.out.println("0. Exit");
             System.out.println("Choose your choice: ");
 
-            int choice = Integer.parseInt(scanner.nextLine());
+            try {
+                int choice = Integer.parseInt(scanner.nextLine());
 
-            switch (choice) {
-                case 1 -> registerParticipant();
-                case 2 -> createEvent();
-                case 3 -> viewAllEvents();
-                case 0 -> {
-                    System.out.println("Exiting.... Goodbye!");
-                    return;
+                switch (choice) {
+                    case 1 -> registerParticipant();
+                    case 2 -> createEvent();
+                    case 3 -> viewAllEvents();
+                    case 4 -> inviteParticipant();
+                    case 5 -> updateInvitation();
+                    case 6 -> viewSortedEvents();
+                    case 7 -> {
+                        System.out.println("Enter Event Title: ");
+                        String title = scanner.nextLine();
+                        viewAttendanceList(title);
+
+                    }
+                    case 0 -> {
+                        System.out.println("Exiting.... Goodbye!");
+                        return;
+                    }
+                    default -> System.out.println("Invalid choice. Try again!");
                 }
-                default -> System.out.println("Invalid choice. Try again!");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a number (0-7) instead of alphabets");
             }
         }
     }
@@ -61,7 +79,7 @@ public class CommunityCenterApp {
         System.out.println("\n-------Register new Participant-------");
 
         System.out.println("Enter Name (Company Name): ");
-        String name = scanner.nextLine();
+        String name = scanner.nextLine().trim();
 
         System.out.println("Enter Email Address: ");
         String email = scanner.nextLine();
@@ -79,7 +97,12 @@ public class CommunityCenterApp {
             System.out.println("✅ Participant registered successfully with ID: "
                     + savedParticipant.getId());
         } catch (Exception e) {
-            System.err.println("❌ Failed to register participant: " + e.getMessage());
+            // Check if error message mentions a "Duplicate Entry"
+            if (e.getMessage().contains("Duplicate entry")) {
+                System.out.println("❌ Registration failed: A Participant with this email already exists!");
+            } else {
+                System.err.println("❌ Failed to register participant: " + e.getMessage());
+            }
         }
     }
     // Create and manage Events
@@ -91,10 +114,10 @@ public class CommunityCenterApp {
         System.out.println("Enter Description: ");
         String desc = scanner.nextLine();
 
-        System.out.println("Enter Start Date & Time (yyyy-MM-dd HH:mm:ss): ");
+        System.out.println("Enter Start Date & Time (yyyy-MM-dd HH:mm): ");
         LocalDateTime start = LocalDateTime.parse(scanner.nextLine(), formatter);
 
-        System.out.println("Enter End Date & Time (yyyy-MM-dd HH:mm:ss): ");
+        System.out.println("Enter End Date & Time (yyyy-MM-dd HH:mm): ");
         LocalDateTime end = LocalDateTime.parse(scanner.nextLine(), formatter);
 
         System.out.println("Enter Location: ");
@@ -106,6 +129,7 @@ public class CommunityCenterApp {
         Event newEvent = new Event(title, desc, start, end, location, capacity);
         eventDAO.save(newEvent);
         System.out.println("✅ Event created with ID: " +  newEvent.getId());
+        System.out.println("Invitations: " + newEvent.getInvitations().size());
     }
     // View all upcoming events
 
@@ -118,24 +142,42 @@ public class CommunityCenterApp {
             return;
         }
 
-        events.forEach(event ->
-                System.out.printf("ID: %d | Title: %s | Desc: %s | Start: %s | " +
-                                "End: %s | Loc: %s | Cap: %d%n",
-                        event.getId(),
-                        event.getTitle(),
-                        event.getDescription(),
-                        event.getStartDateTime(),
-                        event.getEndDateTime(),
-                        event.getLocation(),
-                        event.getCapacity())
-                );
+        for (Event event : events) {
+            // Fetch actual invitations from the database for the specific eventID
+            List<Invitation> dbInvitations = invitationDAO.findByEventId(event.getId());
+
+            // Update the event object's internal list with the database data
+            event.getInvitations().clear();
+            event.getInvitations().addAll(dbInvitations);
+
+            System.out.printf("ID: %d | Title: %s | Desc: %s | Start: %s | " +
+                            "End: %s | Loc: %s | Cap: %d%n",
+                    event.getId(),
+                    event.getTitle(),
+                    event.getDescription(),
+                    event.getStartDateTime(),
+                    event.getEndDateTime(),
+                    event.getLocation(),
+                    event.getCapacity());
+
+            // Checks the list of Event class
+            if (event.getInvitations() == null || event.getInvitations().isEmpty()) {
+                System.out.println("No invitations found.");
+            } else {
+                System.out.println("Participants: " + event.getInvitations().size());
+            }
+            System.out.println("---------------------------------------------------");
+        }
+
     }
     // Invite Participants to an event
 
     public void inviteParticipant() {
         // 1. Get the Participant
         System.out.println("Enter Participant Name: ");
-        String name = scanner.nextLine();
+        String name = scanner.nextLine().trim();
+
+        System.out.println("DEBUG: Searching for Participant with Name: [" + name + "]");
 
         // Logic to get the Participant object from DAO
         Participant participant = participantDAO.findByName(name);
@@ -159,11 +201,16 @@ public class CommunityCenterApp {
                 .count();
 
         // 4. Set Status based on Capacity
-        Status initialStatus = (acceptedCount >= MAX_PARTICIPANTS) ? Status.PENDING : Status.ACCEPTED;
+        Status initialStatus = (acceptedCount >= event.getCapacity()) ? Status.PENDING : Status.ACCEPTED;
 
-        //5. Create and add to List
+        //5. Create and add to the main app List
         Invitation newInvitation = new Invitation(event, participant, initialStatus);
         invitations.add(newInvitation);
+
+        invitationDAO.save(newInvitation);
+
+        // Ensures the Event object "knows" it has a new invitation
+        event.getInvitations().add(newInvitation);
 
         System.out.println("✅ Success: " + name + " added to " + eventName
                 + " with Status " + initialStatus);
@@ -177,10 +224,12 @@ public class CommunityCenterApp {
         }
         // Display current list for user to choose from an index
         System.out.println("\n------- Current Events -------");
-        for (int i = 0; i < invitations.size(); i++) {
+        for (int i =0; i < invitations.size(); i++) {
             Invitation invitation = invitations.get(i);
-            System.out.println(invitation + " . [ " + invitation.getStatus() + " ]" +
-                    invitation.getParticipant().getName() + " @ " + invitation.getEvent().getTitle());
+
+            System.out.println(i + " . [ " + invitation.getStatus() + " ]" +
+                    invitation.getParticipant().getName() + " @ " +
+                    invitation.getEvent().getTitle());
         }
         System.out.println("\nSelect Index to Update: ");
         try {

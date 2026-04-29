@@ -24,7 +24,7 @@ public class ParticipantDAOImpl implements ParticipantDAO {
             // Statement.RETURN_GENERATED_KEYS is used to retrieve auto-generated ID values from INSERT statements
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
         ) {
-            ps.setString(1, participant.getParticipantType());
+            ps.setString(1, participant.getName());
             ps.setString(2, participant.getEmail());
             ps.setString(3, participant.getParticipantType());
             ps.setString(4, participant.getRepresentativeName());
@@ -98,7 +98,7 @@ public class ParticipantDAOImpl implements ParticipantDAO {
 
     @Override
     public Participant findByName(String name) {
-        String sql = "SELECT * FROM participants WHERE name = ?";
+        String sql = "SELECT * FROM participants WHERE LOWER(name) = LOWER(?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, name);

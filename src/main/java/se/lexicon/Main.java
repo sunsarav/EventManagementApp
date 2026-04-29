@@ -7,12 +7,14 @@ import se.lexicon.ui.CommunityCenterApp;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 public class Main {
     static void main() {
         try {
             // Connection Logic
             Connection connection = MySqlConnection.getMysqlDataSource().getConnection();
+            connection.setAutoCommit(true);
 
             // Initialize DAO
             ParticipantDAO participantDAO = new ParticipantDAOImpl(connection);
@@ -20,7 +22,7 @@ public class Main {
             InvitationDAO invitationDAO = new InvitationDAOImpl(connection, participantDAO, eventDAO);
 
             // Start the UI
-            CommunityCenterApp app = new CommunityCenterApp(connection, participantDAO, eventDAO);
+            CommunityCenterApp app = new CommunityCenterApp(connection, participantDAO, eventDAO, invitationDAO);
             app.start();
 
         } catch (SQLException e) {

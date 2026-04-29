@@ -31,12 +31,19 @@ public class InvitationDAOImpl implements InvitationDAO {
             ps.setInt(2,invitation.getEvent().getId());
             ps.setString(3, invitation.getStatus().name());
 
+            System.out.println("DEBUG: Sending to SQL -> ParticipantID: " +
+                    invitation.getParticipant().getId() + ", EventID: " +
+                    invitation.getEvent().getId());
+
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     invitation.setId(rs.getInt(1));
                 }
+            }
+            if (!connection.getAutoCommit()) {
+                connection.commit();
             }
         } catch (SQLException e) {
             System.err.println("❌ This participant is already invited to this event. " + e.getMessage());
@@ -109,6 +116,14 @@ public class InvitationDAOImpl implements InvitationDAO {
     // Using other DAOs to get the actual objects
         Participant participant = participantDAO.findById(participantId);
         Event event = eventDAO.findById(eventId);
+
+    // Debugging Block
+    if (participant == null) {
+        System.out.println("DEBUG: Participant ID " + participantId + " not found in DB!");
+    }
+    if (event == null) {
+        System.out.println("DEBUG: Event ID " + eventId + " not found in DB!");
+    }
 
     // Safety Check: objects exists before creating the invitation
         if (participant == null || event == null) {

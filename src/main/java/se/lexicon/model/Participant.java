@@ -11,7 +11,7 @@ public class Participant {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.participantType = participantName;
+        this.participantType = participantType;
         this.representativeName = representativeName;
     }
     // New participants where DB handles the ID
