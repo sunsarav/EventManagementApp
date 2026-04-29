@@ -5,7 +5,7 @@ public class Participant {
     private String name;
     private String email;
     private String participantType; // 'Individual' or 'Organization'
-    private String representativeName; // Can be null
+    private final String representativeName; // Can be null
 
     public Participant(int id, String name, String email, String participantName, String representativeName) {
         this.id = id;
@@ -40,10 +40,6 @@ public class Participant {
 
     public String getEmail() {
         return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getParticipantType() {

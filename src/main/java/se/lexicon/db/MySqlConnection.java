@@ -3,8 +3,6 @@ package se.lexicon.db;
 import com.mysql.cj.jdbc.MysqlDataSource;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 public class MySqlConnection {
     private static final String URL = "jdbc:mysql://localhost:3306/event_manager";

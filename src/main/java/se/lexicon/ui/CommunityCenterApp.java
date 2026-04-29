@@ -2,7 +2,6 @@ package se.lexicon.ui;
 
 import se.lexicon.dao.EventDAO;
 import se.lexicon.dao.InvitationDAO;
-import se.lexicon.dao.InvitationDAOImpl;
 import se.lexicon.dao.ParticipantDAO;
 import se.lexicon.model.Event;
 import se.lexicon.model.Invitation;
@@ -24,7 +23,6 @@ public class CommunityCenterApp {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private final Scanner scanner = new Scanner(System.in);
     private final List<Invitation> invitations = new ArrayList<>();
-    private final int MAX_PARTICIPANTS = 10;
 
     public CommunityCenterApp(Connection connection, ParticipantDAO participantDAO, EventDAO eventDAO,
                               InvitationDAO invitationDAO)
@@ -96,7 +94,7 @@ public class CommunityCenterApp {
             Participant savedParticipant = participantDAO.save(participant);
             System.out.println("✅ Participant registered successfully with ID: "
                     + savedParticipant.getId());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // Check if error message mentions a "Duplicate Entry"
             if (e.getMessage().contains("Duplicate entry")) {
                 System.out.println("❌ Registration failed: A Participant with this email already exists!");
@@ -241,6 +239,7 @@ public class CommunityCenterApp {
 
                 Status newStatus = Status.valueOf(statusInput);
                 invitations.get(index).setStatus(newStatus);
+
                 System.out.println("✅ Status updated to " + newStatus);
             } else {
                 System.out.println("❌ Invalid index.");
@@ -260,16 +259,23 @@ public class CommunityCenterApp {
             System.out.println("❌ Event " + eventName + " not found.");
             return;
         }
-        System.out.println("------- Attendance List for: " + event.getTitle() + " -------");
 
         // 3. Calling the method on the INSTANCE (invitationDAO)
         List<Invitation> list = invitationDAO.findByEventId(event.getId());
 
+        if (list == null || list.isEmpty()) {
+            System.out.println("No invitations found.");
+            return;
+        }
+
+        System.out.println("------- Attendance List for: " + event.getTitle() + " -------");
+
         // 4. Stream to filter only ACCEPTED
         list.stream()
                 .filter(invitation -> invitation.getStatus() == Status.ACCEPTED)
-                .forEach(invitation -> System.out.println(invitation.getParticipant().getName()));
+                .forEach(invitation -> System.out.println(" - " + invitation.getParticipant().getName()));
         }
+
     // View Sorted Events
 
     public void viewSortedEvents() {

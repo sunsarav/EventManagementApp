@@ -12,7 +12,7 @@ public class Event {
     private LocalDateTime endDateTime;
     private String location;
     private int capacity;
-    private List<Invitation> invitations =  new ArrayList<>();
+    private final List<Invitation> invitations =  new ArrayList<>();
 
     // 7-argument Constructor for database loading
     public Event(int id, String title, String description, LocalDateTime startDateTime,
@@ -49,24 +49,12 @@ public class Event {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public LocalDateTime getStartDateTime() {
         return startDateTime;
-    }
-
-    public void setStartDateTime(LocalDateTime startDateTime) {
-        this.startDateTime = startDateTime;
     }
 
     public LocalDateTime getEndDateTime() {
@@ -87,6 +75,18 @@ public class Event {
 
     public int getCapacity() {
         return capacity;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setStartDateTime(LocalDateTime startDateTime) {
+        this.startDateTime = startDateTime;
     }
 
     public void setCapacity(int capacity) {

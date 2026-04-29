@@ -1,7 +1,7 @@
 package se.lexicon.model;
 
 public class Organization extends Participant {
-    private String representativeName;
+    private final String representativeName;
 
     public Organization(int id, String name, String email, String participantName,
                         String representativeName, String representativeName1) {
@@ -11,11 +11,6 @@ public class Organization extends Participant {
 
     public String getRepresentativeName() {
         return representativeName;
-    }
-
-    public void setRepresentativeName(String representativeName) {
-
-        this.representativeName = representativeName;
     }
 
     @Override

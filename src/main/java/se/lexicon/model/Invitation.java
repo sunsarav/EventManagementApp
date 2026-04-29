@@ -1,10 +1,8 @@
 package se.lexicon.model;
 
-import se.lexicon.dao.EventDAO;
-
 public class Invitation {
-    private int id;                  // Id for database tracking
-    private Event event;             // Composition: Invitation "has an" Event
+    private int id;                  // ID for database tracking
+    private final Event event;             // Composition: Invitation "has an" Event
     private Participant participant; // Composition: Invitation "has a" Participant
     private Status status;
 
@@ -32,10 +30,6 @@ public class Invitation {
 
     public Event getEvent() {
         return event;
-    }
-
-    public void setEvent(Event event) {
-        this.event = event;
     }
 
     public Participant getParticipant() {

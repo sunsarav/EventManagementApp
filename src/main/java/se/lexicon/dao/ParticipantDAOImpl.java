@@ -2,7 +2,6 @@ package se.lexicon.dao;
 
 import se.lexicon.model.Participant;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
