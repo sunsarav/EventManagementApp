@@ -46,8 +46,7 @@ public class InvitationDAOImpl implements InvitationDAO {
                 connection.commit();
             }
         } catch (SQLException e) {
-            System.err.println("❌ This participant is already invited to this event. " + e.getMessage());
-            throw new RuntimeException("Error saving invitation", e);
+            throw new RuntimeException("Duplicate Entry", e);
         }
         return invitation;
     }

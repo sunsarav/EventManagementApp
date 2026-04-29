@@ -203,15 +203,26 @@ public class CommunityCenterApp {
 
         //5. Create and add to the main app List
         Invitation newInvitation = new Invitation(event, participant, initialStatus);
-        invitations.add(newInvitation);
+        try {
+            // Save to database
+            invitationDAO.save(newInvitation);
 
-        invitationDAO.save(newInvitation);
-
-        // Ensures the Event object "knows" it has a new invitation
-        event.getInvitations().add(newInvitation);
+            invitations.add(newInvitation);
+            // Ensures the Event object "knows" it has a new invitation
+            event.getInvitations().add(newInvitation);
 
         System.out.println("✅ Success: " + name + " added to " + eventName
                 + " with Status " + initialStatus);
+    } catch (RuntimeException e) {
+            String message = e.getMessage();
+            String cause = e.getCause() != null ? e.getCause().getMessage() : "";
+            // Catches Duplicate Entry error and prevents crash
+            if (message.contains("Duplicate") || cause.contains("Duplicate")) {
+                System.out.println("❌ Error: This participant is already invited to this event!");
+            } else {
+                System.out.println("❌ Unexpected database error: "  + message);
+            }
+        }
     }
     // Update Invitation Status (accept/decline)
 
