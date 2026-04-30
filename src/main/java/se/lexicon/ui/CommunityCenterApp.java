@@ -3,12 +3,16 @@ package se.lexicon.ui;
 import se.lexicon.dao.EventDAO;
 import se.lexicon.dao.InvitationDAO;
 import se.lexicon.dao.ParticipantDAO;
+import se.lexicon.db.MySqlConnection;
 import se.lexicon.model.Event;
 import se.lexicon.model.Invitation;
 import se.lexicon.model.Participant;
 import se.lexicon.model.Status;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -227,6 +231,7 @@ public class CommunityCenterApp {
     // Update Invitation Status (accept/decline)
 
     public void updateInvitation() {
+
         if (invitations.isEmpty()) {
             System.out.println("No invitations to update");
             return;
@@ -247,11 +252,54 @@ public class CommunityCenterApp {
             if (index >= 0 && index < invitations.size()) {
                 System.out.println("Enter new status (ACCEPTED, PENDING, DECLINED): ");
                 String statusInput = scanner.nextLine().toUpperCase();
-
                 Status newStatus = Status.valueOf(statusInput);
-                invitations.get(index).setStatus(newStatus);
 
+                Invitation selectedInvitation = invitations.get(index);
+
+                // Capacity Check Logic
+                if (newStatus == Status.ACCEPTED && selectedInvitation.getStatus() != Status.ACCEPTED) {
+
+                    // Stream to count how many people are already ACCEPTED for this specific event
+                    long acceptedCount = invitations.stream()
+                            .filter(invitation -> invitation.getEvent().getId() == selectedInvitation.getEvent().getId())
+                            .filter(invitation -> invitation.getStatus() == Status.ACCEPTED)
+                            .count();
+
+                    if (acceptedCount >= selectedInvitation.getEvent().getCapacity()) {
+                        System.out.println("❌ Error: Cannot accept. Event '" +
+                                selectedInvitation.getEvent().getTitle() + "' is full!");
+                        return; // Stop the update here
+                    }
+                }
+                // Update the change in SQL
+                String sql = "UPDATE invitations SET status = ? WHERE participant_id = ? AND event_id = ?";
+
+                // Use try-with-resources to automatically close your connection and statement
+                try (Connection conn = MySqlConnection.getMysqlDataSource().getConnection();
+                     PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                    // 1. Set the new status string
+                    ps.setString(1, newStatus.toString());
+
+                    // 2. Use the IDs from your objects to identify the right row in MySQL
+                    ps.setInt(2, selectedInvitation.getParticipant().getId());
+                    ps.setInt(3, selectedInvitation.getEvent().getId());
+
+                    // 3. Run the update
+                    int rowsAffected = ps.executeUpdate();
+
+                    if (rowsAffected > 0) {
+                        System.out.println("💾 Change saved to database.");
+                    }
+
+                } catch (SQLException e) {
+                    System.out.println("❌ Database error: " + e.getMessage());
+                }
+
+                selectedInvitation.setStatus(newStatus);
                 System.out.println("✅ Status updated to " + newStatus);
+
+
             } else {
                 System.out.println("❌ Invalid index.");
             }
