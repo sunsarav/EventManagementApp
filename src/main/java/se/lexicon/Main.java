@@ -2,12 +2,10 @@ package se.lexicon;
 
 import se.lexicon.dao.*;
 import se.lexicon.db.MySqlConnection;
-import se.lexicon.model.Participant;
 import se.lexicon.ui.CommunityCenterApp;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Scanner;
 
 public class Main {
     static void main() {
