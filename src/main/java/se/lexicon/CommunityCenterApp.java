@@ -1,4 +1,4 @@
-package se.lexicon.ui;
+package se.lexicon;
 
 import se.lexicon.dao.EventDAO;
 import se.lexicon.dao.InvitationDAO;
@@ -9,12 +9,12 @@ import se.lexicon.model.Invitation;
 import se.lexicon.model.Participant;
 import se.lexicon.model.Status;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -116,12 +116,40 @@ public class CommunityCenterApp {
         System.out.println("Enter Description: ");
         String desc = scanner.nextLine();
 
-        System.out.println("Enter Start Date & Time (yyyy-MM-dd HH:mm): ");
-        LocalDateTime start = LocalDateTime.parse(scanner.nextLine(), formatter);
+        LocalDateTime start = null;
+        // Loop until a valid future date is entered
+        while (start == null) {
+            System.out.println("Enter Start Date & Time (yyyy-MM-dd HH:mm): ");
+            try {
+                LocalDateTime inputDate = LocalDateTime.parse(scanner.nextLine(), formatter);
 
+                // Check if the date is in the past
+                if (inputDate.isBefore(LocalDateTime.now())) {
+                    System.out.println("❌ It's a past date!, Enter a future date to create an event.");
+                } else {
+                    start = inputDate;
+                }
+            } catch (DateTimeParseException e) {
+                System.out.println("❌ Invalid format. Please use yyyy-MM-dd HH:mm");
+            }
+        }
+        LocalDateTime end = null;
+        // Loop until a valid future date is entered
+        while (end == null) {
         System.out.println("Enter End Date & Time (yyyy-MM-dd HH:mm): ");
-        LocalDateTime end = LocalDateTime.parse(scanner.nextLine(), formatter);
+        try {
+            LocalDateTime endDate = LocalDateTime.parse(scanner.nextLine(), formatter);
 
+            // Check if end date is after start date
+            if (endDate.isBefore(start)) {
+                System.out.println("⚠\uFE0F Warning: End Date is before Start Date!");
+            } else {
+                end = endDate;
+            }
+        } catch (DateTimeParseException e) {
+            System.out.println("❌ Invalid format. Please use yyyy-MM-dd HH:mm");
+        }
+        }
         System.out.println("Enter Location: ");
         String location = scanner.nextLine();
 
