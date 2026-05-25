@@ -26,51 +26,9 @@ The application allows staff members to create events with specific capacities a
 
 ## ✅ Why I Built 
 Built this to practice real-world backend patterns after noticing most event apps don't handle overbooking gracefully
-```mermaid
-classDiagram
-    class Participant {
-        <<abstract>>
-        -id : int
-        -name : String
-        -email : String
-    }
 
-    class Individual
+![Class Diagram](Class_diagram.png)
 
-    class Organization {
-        -representativeName : String
-    }
-
-    class Event {
-        -id : int
-        -title : String
-        -description : String
-        -startDateTime : LocalDateTime
-        -endDateTime : LocalDateTime
-        -location : String
-        -capacity : int
-        +isFull() boolean
-    }
-
-    class Invitation {
-        -eventId : int
-        -participantId : int
-        -status : Status
-    }
-
-    class Status {
-        <<enumeration>>
-        PENDING
-        ACCEPTED
-        DECLINED
-    }
-
-    Participant <|-- Individual
-    Participant <|-- Organization
-    Event "1" --> "0..*" Invitation
-    Participant "1" --> "0..*" Invitation
-    Invitation --> Status
-```
 
 ## 🚀 How to Run
 **Prerequisites:** Java 17+, MySQL 8.0+, any IDE(IntelliJ recommended)
@@ -85,4 +43,6 @@ classDiagram
 ![Screenshot of the application output](Output1.jpg)
 ![Screenshot of the application output](Output2.jpg)
 ![Screenshot of the application output](Output3.jpg)
+
+
 
