@@ -39,9 +39,13 @@ Built this to practice real-world backend patterns after noticing most event app
 
 ## 📸 Application Preview
 
+## App Menu & Upcoming Events
 ![Screenshot of the application output](First_Output.jpg)
+## Exception Handling
 ![Screenshot of the application output](Output1.jpg)
+## Prevent Overbooking
 ![Screenshot of the application output](Output2.jpg)
+## Prevent duplicate invitations
 ![Screenshot of the application output](Output3.jpg)
 
 
