@@ -26,7 +26,6 @@ The application allows staff members to create events with specific capacities a
 
 ## ✅ Why I Built 
 Built this to practice real-world backend patterns after noticing most event apps don't handle overbooking gracefully
-
 ```mermaid
 classDiagram
     class Participant {
