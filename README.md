@@ -21,54 +21,69 @@ The application allows staff members to create events with specific capacities a
 - **API:** JDBC (Java Database Connectivity)
 - **Version Control:** Git (using feature branching strategy)
 
-## ✅ Requirements Met
-- **Domain Modeling:** UML-based class structure.
+## 📁 Project Structure
+![Project Structure](ProjectStructure.jpg)
+
+## ✅ Why I Built 
+Built this to practice real-world backend patterns after noticing most event apps don't handle overbooking gracefully
+
 ```mermaid
 classDiagram
     class Participant {
         <<abstract>>
-        -int id
-        -String name
-        -String email
+        -id : int
+        -name : String
+        -email : String
     }
-    class Individual {
-    }
+
+    class Individual
+
     class Organization {
-        -String representativeName
+        -representativeName : String
     }
+
     class Event {
-        -int id
-        -String title
-        -String description
-        -LocalDateTime startDateTime
-        -LocalDateTime endDateTime
-        -String location
-        -int capacity
-        +isfull() boolean
+        -id : int
+        -title : String
+        -description : String
+        -startDateTime : LocalDateTime
+        -endDateTime : LocalDateTime
+        -location : String
+        -capacity : int
+        +isFull() boolean
     }
+
     class Invitation {
-        -int eventId
-        -int participantId
-        -Status status
+        -eventId : int
+        -participantId : int
+        -status : Status
     }
+
     class Status {
         <<enumeration>>
         PENDING
         ACCEPTED
         DECLINED
     }
+
     Participant <|-- Individual
     Participant <|-- Organization
-    Event "1" -- "0..*" Invitation
-    Participant "1" -- "0..*" Invitation
+    Event "1" --> "0..*" Invitation
+    Participant "1" --> "0..*" Invitation
     Invitation --> Status
 ```
 
-- **OOP Principles:** Abstraction, Encapsulation, Inheritance, and Polymorphism.
-- **Clean Code:** Meaningful naming, exception handling, and modular logic.
-
 ## 🚀 How to Run
-1. Clone the repository.
-2. Execute the provided `schema.sql` in your MySQL environment.
-3. Update the database connection credentials in the `DatabaseConfiguration` class.
-4. Run `Main.java` to start the console menu.
+**Prerequisites:** Java 17+, MySQL 8.0+, any IDE(IntelliJ recommended)
+1. Clone the repo
+2. Create a MySQL database and run `schema.sql` 
+3. Set your DB credentials in `DatabaseConfiguration.java`
+4. Run `Main.java` - a console menu will launch 
+
+## 📸 Application Preview
+
+![Screenshot of the application output](First_Output.jpg)
+![Screenshot of the application output](Output1.jpg)
+![Screenshot of the application output](Output2.jpg)
+![Screenshot of the application output](Output3.jpg)
+
